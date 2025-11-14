@@ -1,0 +1,11 @@
+{
+    "asset": "79320a8e92a9ebc4a80ad33a7826bc6f",
+    "fileName": "019a8272-4185-72ba-9e9b-94ff7a1e036f.pose.json",
+    "prompt": "Create an animation for a character walking left and right on a flat background without vertical movement.",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 410798461,
+    "w3CTraceId": "0180011e3952c5ac5441ca091ddc0b2d",
+    "isTrimmed": false
+}

@@ -1,0 +1,11 @@
+{
+    "asset": "9df47496a641ee74998c97092052a050",
+    "fileName": "019a8274-4ba7-7090-8f19-ffd7e0f1f089_Preview.png",
+    "prompt": "Generate a flat terrain layer suitable for a character to walk left and right without vertical movement.",
+    "negativePrompt": "",
+    "model": "44ec3749-963a-44b1-aa54-dc19f6ed8ab2",
+    "modelName": "Unity Texture2D",
+    "customSeed": 963551986,
+    "w3CTraceId": "8f7712bbe26ae49399d0bc7bd15ce945",
+    "refinementMode": "Generation"
+}
