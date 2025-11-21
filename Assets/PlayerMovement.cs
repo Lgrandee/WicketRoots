@@ -7,52 +7,44 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
+
     private Rigidbody2D rb;
     private Animator animator;
+    private SpriteRenderer spriteRenderer;
+
     private Vector2 movement;
-    private Vector3 originalScale;
 
     void Start()
     {
-        // Try to find the Rigidbody2D on this GameObject. If it's missing,
-        // add one at runtime so the game doesn't throw MissingComponentException.
+        // Get Rigidbody2D (required)
         rb = GetComponent<Rigidbody2D>();
-        if (rb == null)
-        {
-            rb = gameObject.AddComponent<Rigidbody2D>();
-            Debug.LogWarning("PlayerMovement: Rigidbody2D was missing on '" + gameObject.name + "'. Added one at runtime.");
-        }
 
+        // Get Animator (optional but used)
         animator = GetComponent<Animator>();
-        originalScale = transform.localScale; // Store the original scale
+
+        // Get SpriteRenderer (used for flipping safely)
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        // Only allow horizontal movement
+        // Only horizontal movement
         movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = 0; // Prevent vertical movement
+        movement.y = 0;
 
-        bool isMoving = Mathf.Abs(movement.x) > 0;
+        bool isMoving = Mathf.Abs(movement.x) != 0;
         animator.SetBool("isMoving", isMoving);
 
+        // Flip safely (no scale change)
         if (movement.x != 0)
         {
-            // Flip the character horizontally while preserving the original scale
-            transform.localScale = new Vector3(originalScale.x * Mathf.Sign(movement.x), originalScale.y, originalScale.z);
+            spriteRenderer.flipX = movement.x < 0;
         }
     }
 
     void FixedUpdate()
     {
-        // ✅ Defensive: skip movement if Rigidbody2D missing
-        if (rb == null)
-        {
-            Debug.LogWarning("Rigidbody2D is missing on '" + gameObject.name + "' — skipping movement.");
-            return;
-        }
-
-        // Move only along the x-axis
-        rb.MovePosition(new Vector2(rb.position.x + movement.x * moveSpeed * Time.fixedDeltaTime, rb.position.y));
+        // Move using Rigidbody2D physics
+        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
     }
 }
