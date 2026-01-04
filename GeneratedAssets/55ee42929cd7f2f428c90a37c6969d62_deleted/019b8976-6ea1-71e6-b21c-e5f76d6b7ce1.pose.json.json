@@ -1,0 +1,11 @@
+{
+    "asset": "55ee42929cd7f2f428c90a37c6969d62",
+    "fileName": "019b8976-6ea1-71e6-b21c-e5f76d6b7ce1.pose.json",
+    "prompt": "Create an animation for the avatar Matildea interacting with a door labeled 'Deur-buiten_0' when the 'E' key is pressed.",
+    "negativePrompt": "",
+    "model": "9e46c009-67d8-4254-a3a0-32e3168247ee",
+    "modelName": "Text to Motion",
+    "customSeed": 607127057,
+    "w3CTraceId": "0e59583e8b1a98d945b1d200eb5ff331",
+    "isTrimmed": false
+}
