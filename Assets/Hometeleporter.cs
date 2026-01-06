@@ -2,19 +2,23 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-public class Doortransition : MonoBehaviour
+public class Hometeleporter : MonoBehaviour
 {
+    [Header("Destination")]
+    [Tooltip("Scene to load when using this door.")]
     public string sceneToLoad;
+
+    [Header("FX")]
     public float fadeDuration = 1f;
-    public string spawnPointName = "DoorSpawn";
 
     private bool playerInRange;
-    private float fadeAlpha = 0f;
+    private float fadeAlpha;
+    private bool isLoading;
 
-
-    private void Update()
+    // Update is called once per frame
+    void Update()
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        if (playerInRange && !isLoading && Input.GetKeyDown(KeyCode.E))
         {
             StartCoroutine(FadeAndLoadScene());
         }
@@ -22,14 +26,16 @@ public class Doortransition : MonoBehaviour
 
     private IEnumerator FadeAndLoadScene()
     {
+        isLoading = true;
+
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-            fadeAlpha = Mathf.Lerp(0, 1, elapsed / fadeDuration);
+            fadeAlpha = Mathf.Lerp(0f, 1f, elapsed / fadeDuration);
             yield return null;
         }
-        fadeAlpha = 1f;
+
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.LoadScene(sceneToLoad);
     }
@@ -38,40 +44,29 @@ public class Doortransition : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        GameObject spawn = GameObject.Find(spawnPointName);
-
-        if (player != null && spawn != null)
-        {
-            player.transform.position = spawn.transform.position;
-        }
-
         fadeAlpha = 0f;
+        isLoading = false;
     }
 
     private void OnGUI()
     {
-        if (fadeAlpha > 0)
+        if (fadeAlpha > 0f)
         {
-            GUI.color = new Color(1, 1, 1, fadeAlpha);
+            GUI.color = new Color(1f, 1f, 1f, fadeAlpha);
             GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
             GUI.color = Color.white;
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collistion)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collistion.CompareTag("Player"))
-        {
+        if (collision.CompareTag("Player"))
             playerInRange = true;
-        }
     }
 
-    private void OnTriggerExit2D(Collider2D collistion)
+    private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collistion.CompareTag("Player"))
-        {
+        if (collision.CompareTag("Player"))
             playerInRange = false;
-        }
     }
 }
