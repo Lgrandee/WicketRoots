@@ -56,6 +56,21 @@ public class Hometeleporter : MonoBehaviour
             GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
             GUI.color = Color.white;
         }
+
+        // Display prompt when player is in range
+        if (playerInRange && !isLoading)
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label);
+            style.fontSize = 24;
+            style.alignment = TextAnchor.MiddleCenter;
+            style.normal.textColor = Color.white;
+
+            string message = "Press E to go back inside";
+            Vector2 size = style.CalcSize(new GUIContent(message));
+            Rect rect = new Rect((Screen.width - size.x) / 2, Screen.height * 0.7f, size.x, size.y);
+            
+            GUI.Label(rect, message, style);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
