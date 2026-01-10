@@ -17,6 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/store.unity
     guid: bd5816e34c64f064e97883b71e6381d5
+  - enabled: 1
+    path: Assets/Scenes/cutsene.unity
+    guid: bab6b44b5ea079b46bf700b828eaaab2
+  - enabled: 1
+    path: Assets/Scenes/matildasroom.unity
+    guid: b091af995f588a444b57869f6ac18a51
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

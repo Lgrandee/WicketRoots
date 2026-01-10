@@ -7,6 +7,7 @@ public class Doortransition : MonoBehaviour
     public string sceneToLoad;
     public float fadeDuration = 1f;
     public string spawnPointName = "DoorSpawn";
+    public string promptMessage = "Press E to enter";
 
     private bool playerInRange;
     private float fadeAlpha = 0f;
@@ -66,7 +67,7 @@ public class Doortransition : MonoBehaviour
             style.alignment = TextAnchor.MiddleCenter;
             style.normal.textColor = Color.white;
 
-            string message = "Press E to go outside";
+            string message = promptMessage;
             Vector2 size = style.CalcSize(new GUIContent(message));
             Rect rect = new Rect((Screen.width - size.x) / 2, Screen.height * 0.7f, size.x, size.y);
             

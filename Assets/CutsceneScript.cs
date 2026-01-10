@@ -1,23 +1,29 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class TextScript : MonoBehaviour
+public class CutsceneScript : MonoBehaviour
 {
     [Header("Dialogue Content")]
     [SerializeField] private TextAsset scriptFile;
 
+    [Header("Scene Transition")]
+    [SerializeField] private string sceneToLoad;
+    [SerializeField] private float delayBeforeSceneLoad = 0.5f;
+
     [Header("Interaction")]
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private bool triggerOnKeyPress = true;
+    [SerializeField] private KeyCode startKey = KeyCode.E;
+    [SerializeField] private KeyCode skipKey = KeyCode.Space;
+    [SerializeField] private bool allowSkip = true;
 
     [Header("Bubble Settings")]
     [SerializeField] private Vector3 bubbleOffset = new Vector3(0f, 1.8f, 0f);
-    [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f); // world units
+    [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f);
     [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.16f, 0.9f);
     [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
-    [SerializeField, Range(10, 200)] private int textSize = 60; // font size
+    [SerializeField, Range(10, 500)] private int textSize = 60;
 
     [Header("Prompt Settings")]
-    [SerializeField] private string promptText = "Press E to talk";
+    [SerializeField] private string promptText = "Press E to start";
     [SerializeField] private Vector3 promptOffset = new Vector3(0f, 2.5f, 0f);
     [SerializeField] private Color promptColor = new Color(1f, 1f, 0.5f, 1f);
 
@@ -30,7 +36,7 @@ public class TextScript : MonoBehaviour
 
     private GameObject activeBubble;
     private GameObject promptBubble;
-    private bool playerInRange;
+    private bool cutsceneStarted = false;
     private string[] dialogueLines;
     private int currentLineIndex = 0;
     private TextMesh activeTextMesh;
@@ -38,29 +44,26 @@ public class TextScript : MonoBehaviour
 
     public TextAsset ScriptFile => scriptFile;
 
+    private void Start()
+    {
+        // Show prompt to start cutscene
+        SpawnPrompt();
+    }
+
     private void Update()
     {
-        if (triggerOnKeyPress)
+        // Wait for E to start the cutscene
+        if (!cutsceneStarted && Input.GetKeyDown(startKey))
         {
-            if (playerInRange && Input.GetKeyDown(interactKey))
-            {
-                if (activeBubble == null)
-                {
-                    SpawnBubble();
-                    DespawnPrompt();
-                }
-                else
-                {
-                    AdvanceDialogue();
-                }
-            }
+            cutsceneStarted = true;
+            DespawnPrompt();
+            SpawnBubble();
         }
-        else
+
+        // Allow skipping to next line with key press
+        if (allowSkip && activeBubble != null && Input.GetKeyDown(skipKey))
         {
-            if (activeBubble == null)
-                SpawnBubble();
-            else
-                UpdateBubblePosition();
+            AdvanceDialogue();
         }
 
         // Auto-advance dialogue if enabled
@@ -74,7 +77,9 @@ public class TextScript : MonoBehaviour
             }
         }
 
-        // Update positions if they exist
+        // Keep bubble positioned
+        if (activeBubble != null)
+            UpdateBubblePosition();
         if (promptBubble != null)
             UpdatePromptPosition();
     }
@@ -93,7 +98,7 @@ public class TextScript : MonoBehaviour
 
     private void AdvanceDialogue()
     {
-        autoAdvanceTimer = 0f; // Reset timer
+        autoAdvanceTimer = 0f;
         currentLineIndex++;
         if (currentLineIndex < dialogueLines.Length)
         {
@@ -101,11 +106,29 @@ public class TextScript : MonoBehaviour
         }
         else
         {
-            // End of dialogue - close bubble and show prompt again
+            // End of dialogue - load the next scene
             DespawnBubble();
             currentLineIndex = 0;
-            SpawnPrompt();
+            LoadNextScene();
         }
+    }
+
+    private void LoadNextScene()
+    {
+        if (!string.IsNullOrEmpty(sceneToLoad))
+        {
+            StartCoroutine(LoadSceneAfterDelay());
+        }
+        else
+        {
+            Debug.LogWarning("CutsceneScript: No scene specified to load after cutscene!");
+        }
+    }
+
+    private System.Collections.IEnumerator LoadSceneAfterDelay()
+    {
+        yield return new WaitForSeconds(delayBeforeSceneLoad);
+        SceneManager.LoadScene(sceneToLoad);
     }
 
     private void SpawnBubble()
@@ -115,7 +138,7 @@ public class TextScript : MonoBehaviour
         LoadDialogueLines();
         if (dialogueLines.Length == 0) return;
 
-        autoAdvanceTimer = 0f; // Reset timer when starting dialogue
+        autoAdvanceTimer = 0f;
 
         // Create bubble root
         activeBubble = new GameObject("TextBubble");
@@ -127,10 +150,9 @@ public class TextScript : MonoBehaviour
         var renderer = activeBubble.AddComponent<SpriteRenderer>();
         renderer.sprite = CreateSolidSprite(backgroundColor);
         renderer.sortingOrder = 20;
-        // scale 1x1 sprite to desired size
         root.localScale = new Vector3(backgroundSize.x, backgroundSize.y, 1f);
 
-        // Text using legacy TextMesh (keeps dependencies minimal)
+        // Text using legacy TextMesh
         var textObject = new GameObject("DialogueText");
         textObject.transform.SetParent(activeBubble.transform);
         textObject.transform.localPosition = Vector3.zero;
@@ -139,7 +161,7 @@ public class TextScript : MonoBehaviour
         activeTextMesh = textObject.AddComponent<TextMesh>();
         activeTextMesh.text = WrapText(dialogueLines[currentLineIndex]);
         activeTextMesh.fontSize = textSize;
-        activeTextMesh.characterSize = 0.01f; // fixed small value
+        activeTextMesh.characterSize = 0.01f;
         activeTextMesh.anchor = TextAnchor.MiddleCenter;
         activeTextMesh.alignment = TextAlignment.Center;
         activeTextMesh.color = textColor;
@@ -218,7 +240,6 @@ public class TextScript : MonoBehaviour
 
         foreach (var word in words)
         {
-            // Check if adding this word would exceed the limit
             var testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
             
             if (testLine.Length <= maxCharactersPerLine)
@@ -227,7 +248,6 @@ public class TextScript : MonoBehaviour
             }
             else
             {
-                // Add current line to result and start new line
                 if (!string.IsNullOrEmpty(wrappedText))
                     wrappedText += "\n";
                 wrappedText += currentLine;
@@ -235,7 +255,6 @@ public class TextScript : MonoBehaviour
             }
         }
 
-        // Add the last line
         if (!string.IsNullOrEmpty(currentLine))
         {
             if (!string.IsNullOrEmpty(wrappedText))
@@ -252,28 +271,6 @@ public class TextScript : MonoBehaviour
         tex.SetPixel(0, 0, color);
         tex.Apply();
         return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
-    }
-
-    // Using 2D colliders - set them as triggers on your objects
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = true;
-            if (triggerOnKeyPress && activeBubble == null)
-                SpawnPrompt();
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            DespawnPrompt();
-            DespawnBubble();
-            currentLineIndex = 0; // Reset dialogue progress when player leaves
-        }
     }
 
     private void OnDisable()

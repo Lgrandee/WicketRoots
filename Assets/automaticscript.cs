@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class TextScript : MonoBehaviour
+public class AutomaticScript : MonoBehaviour
 {
     [Header("Dialogue Content")]
     [SerializeField] private TextAsset scriptFile;
 
     [Header("Interaction")]
     [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private bool triggerOnKeyPress = true;
+    [SerializeField] private bool autoPlayOnEnter = true;
 
     [Header("Bubble Settings")]
     [SerializeField] private Vector3 bubbleOffset = new Vector3(0f, 1.8f, 0f);
@@ -40,7 +40,7 @@ public class TextScript : MonoBehaviour
 
     private void Update()
     {
-        if (triggerOnKeyPress)
+        if (!autoPlayOnEnter)
         {
             if (playerInRange && Input.GetKeyDown(interactKey))
             {
@@ -55,11 +55,9 @@ public class TextScript : MonoBehaviour
                 }
             }
         }
-        else
+        else if (autoPlayOnEnter && playerInRange)
         {
-            if (activeBubble == null)
-                SpawnBubble();
-            else
+            if (activeBubble != null)
                 UpdateBubblePosition();
         }
 
@@ -260,12 +258,38 @@ public class TextScript : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
-            if (triggerOnKeyPress && activeBubble == null)
+            if (!autoPlayOnEnter && activeBubble == null)
                 SpawnPrompt();
+            else if (autoPlayOnEnter && activeBubble == null)
+                SpawnBubble(); // Auto-start dialogue when player walks through
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = false;
+            DespawnPrompt();
+            DespawnBubble();
+            currentLineIndex = 0; // Reset dialogue progress when player leaves
+        }
+    }
+
+    // Using 3D colliders - set them as triggers on your objects
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = true;
+            if (!autoPlayOnEnter && activeBubble == null)
+                SpawnPrompt();
+            else if (autoPlayOnEnter && activeBubble == null)
+                SpawnBubble(); // Auto-start dialogue when player walks through
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
