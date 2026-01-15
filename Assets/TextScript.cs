@@ -14,7 +14,7 @@ public class TextScript : MonoBehaviour
     [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f); // world units
     [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.16f, 0.9f);
     [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
-    [SerializeField, Range(10, 200)] private int textSize = 60; // font size
+    [SerializeField, Range(10, 500)] private int textSize = 500; // font size
 
     [Header("Prompt Settings")]
     [SerializeField] private string promptText = "Press E to talk";

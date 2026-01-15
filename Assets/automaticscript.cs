@@ -1,40 +1,59 @@
 using UnityEngine;
 
+/// <summary>
+/// AutomaticScript handles dialogue display and management in a game world.
+/// It displays text bubbles with dialogue content, optionally plays audio, and can auto-advance through dialogue lines.
+/// Players can interact with dialogue via a key press or it can auto-play when they enter a trigger zone.
+/// </summary>
 public class AutomaticScript : MonoBehaviour
 {
+    // ===== DIALOGUE CONTENT =====
     [Header("Dialogue Content")]
-    [SerializeField] private TextAsset scriptFile;
+    [SerializeField] private TextAsset scriptFile; // Text file containing dialogue lines (one line per line in the file)
 
+    // ===== INTERACTION SETTINGS =====
     [Header("Interaction")]
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private bool autoPlayOnEnter = true;
+    [SerializeField] private KeyCode interactKey = KeyCode.E; // Key required to advance dialogue manually
+    [SerializeField] private bool autoPlayOnEnter = true; // If true, dialogue starts automatically when player enters; if false, player must press key
 
+    // ===== DIALOGUE BUBBLE APPEARANCE =====
     [Header("Bubble Settings")]
-    [SerializeField] private Vector3 bubbleOffset = new Vector3(0f, 1.8f, 0f);
-    [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f); // world units
-    [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.16f, 0.9f);
-    [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
-    [SerializeField, Range(10, 200)] private int textSize = 60; // font size
+    [SerializeField] private Vector3 bubbleOffset = new Vector3(0f, 1.8f, 0f); // Position offset above the character
+    [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f); // Bubble dimensions in world units
+    [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.16f, 0.9f); // Background color (dark blue-grey)
+    [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f); // Text color (light grey)
+    [SerializeField, Range(10, 200)] private int textSize = 60; // Font size for dialogue text
 
+    // ===== INTERACTION PROMPT DISPLAY =====
     [Header("Prompt Settings")]
-    [SerializeField] private string promptText = "Press E to talk";
-    [SerializeField] private Vector3 promptOffset = new Vector3(0f, 2.5f, 0f);
-    [SerializeField] private Color promptColor = new Color(1f, 1f, 0.5f, 1f);
+    [SerializeField] private string promptText = "Press E to talk"; // Text shown above character prompting player to interact
+    [SerializeField] private Vector3 promptOffset = new Vector3(0f, 2.5f, 0f); // Position where prompt appears relative to character
+    [SerializeField] private Color promptColor = new Color(1f, 1f, 0.5f, 1f); // Prompt text color (yellow)
 
+    // ===== TEXT FORMATTING =====
     [Header("Text Wrapping")]
-    [SerializeField, Range(10, 100)] private int maxCharactersPerLine = 40;
+    [SerializeField, Range(10, 100)] private int maxCharactersPerLine = 40; // Maximum characters per line before wrapping to next line
 
+    // ===== AUTO-ADVANCE SETTINGS =====
     [Header("Auto Advance")]
-    [SerializeField] private bool autoAdvance = true;
-    [SerializeField, Range(1f, 10f)] private float secondsPerLine = 3f;
+    [SerializeField] private bool autoAdvance = true; // If true, dialogue advances automatically after delay
+    [SerializeField, Range(1f, 10f)] private float secondsPerLine = 3f; // How long to display each dialogue line before advancing
 
-    private GameObject activeBubble;
-    private GameObject promptBubble;
-    private bool playerInRange;
-    private string[] dialogueLines;
-    private int currentLineIndex = 0;
-    private TextMesh activeTextMesh;
-    private float autoAdvanceTimer = 0f;
+    // ===== AUDIO SETTINGS =====
+    [Header("Sound Settings")]
+    [SerializeField] private AudioClip dialogueSound; // Audio clip to play when dialogue starts
+    [SerializeField, Range(0.1f, 10f)] private float soundDuration = 2f; // How long to play the sound before stopping
+    [SerializeField, Range(0f, 1f)] private float soundVolume = 1f; // Volume of the dialogue sound (0-1)
+
+    // ===== INTERNAL STATE =====
+    private GameObject activeBubble; // Currently active dialogue bubble (null if none)
+    private AudioSource audioSource; // Audio source component for playing dialogue sound
+    private GameObject promptBubble; // Prompt text shown to encourage interaction
+    private bool playerInRange; // Whether player is currently in trigger area
+    private string[] dialogueLines; // Array of dialogue lines loaded from text file
+    private int currentLineIndex = 0; // Index of current line being displayed
+    private TextMesh activeTextMesh; // Text mesh component of the dialogue bubble
+    private float autoAdvanceTimer = 0f; // Timer for auto-advancing to next line
 
     public TextAsset ScriptFile => scriptFile;
 
@@ -115,6 +134,9 @@ public class AutomaticScript : MonoBehaviour
 
         autoAdvanceTimer = 0f; // Reset timer when starting dialogue
 
+        // Play dialogue sound for a couple seconds
+        PlayDialogueSound();
+
         // Create bubble root
         activeBubble = new GameObject("TextBubble");
         var root = activeBubble.transform;
@@ -192,6 +214,32 @@ public class AutomaticScript : MonoBehaviour
         {
             Destroy(promptBubble);
             promptBubble = null;
+        }
+    }
+
+    private void PlayDialogueSound()
+    {
+        if (dialogueSound == null) return;
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.clip = dialogueSound;
+        audioSource.volume = soundVolume;
+        audioSource.Play();
+
+        // Stop the sound after the specified duration
+        StartCoroutine(StopSoundAfterDuration());
+    }
+
+    private System.Collections.IEnumerator StopSoundAfterDuration()
+    {
+        yield return new WaitForSeconds(soundDuration);
+        if (audioSource != null && audioSource.isPlaying)
+        {
+            audioSource.Stop();
         }
     }
 

@@ -317,19 +317,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7df305c17eb4ec4b9b36e4df24303b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Camarawall
-  minX: -10
-  maxX: 10
-  minY: -10
-  maxY: 10
-  minZ: -10
-  maxZ: 10
-  enableBoundaries: 1
-  showGizmos: 1
-  gizmoColor:
-    r: 1
-    g: 0.92156863
-    b: 0.015686275
-    a: 1
 --- !u!61 &402781946
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -515,19 +502,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7df305c17eb4ec4b9b36e4df24303b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Camarawall
-  minX: -10
-  maxX: 10
-  minY: -10
-  maxY: 10
-  minZ: -10
-  maxZ: 10
-  enableBoundaries: 1
-  showGizmos: 1
-  gizmoColor:
-    r: 1
-    g: 0.92156863
-    b: 0.015686275
-    a: 1
 --- !u!61 &978583668
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -739,18 +713,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58df5475fbfdaaf41a31cfb3182d0a67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TextScript
-  scriptFile: {fileID: 0}
+  scriptFile: {fileID: 4900000, guid: 9b615a676b88e1d48892e6ebcfd92234, type: 3}
   interactKey: 101
   triggerOnKeyPress: 1
-  bubbleOffset: {x: 0, y: 1.8, z: 0}
-  backgroundSize: {x: 4.2, y: 2.2}
+  bubbleOffset: {x: 0, y: 1, z: 0}
+  backgroundSize: {x: 8.2, y: 2.2}
   backgroundColor: {r: 0.12, g: 0.12, b: 0.16, a: 0.9}
   textColor: {r: 0.92, g: 0.92, b: 0.92, a: 1}
-  textSize: 60
+  textSize: 309
   promptText: Press E to talk to Joel
-  promptOffset: {x: 0, y: 2.5, z: 0}
+  promptOffset: {x: 0, y: 0.5, z: 0}
   promptColor: {r: 0.5176471, g: 0.6039216, b: 0.2784314, a: 1}
-  maxCharactersPerLine: 40
+  maxCharactersPerLine: 39
   autoAdvance: 1
   secondsPerLine: 3
 --- !u!1 &1378679628
@@ -1097,19 +1071,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7df305c17eb4ec4b9b36e4df24303b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Camarawall
-  minX: -10
-  maxX: 10
-  minY: -10
-  maxY: 10
-  minZ: -10
-  maxZ: 10
-  enableBoundaries: 1
-  showGizmos: 1
-  gizmoColor:
-    r: 1
-    g: 0.92156863
-    b: 0.015686275
-    a: 1
 --- !u!61 &1646749407
 BoxCollider2D:
   m_ObjectHideFlags: 0
