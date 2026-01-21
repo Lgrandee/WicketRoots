@@ -34,6 +34,20 @@ public class TextScript : MonoBehaviour
     [SerializeField] private bool autoAdvance = true;
     [SerializeField, Range(1f, 10f)] private float secondsPerLine = 2f; // was 3f
 
+    // new: hold-to-close
+    [SerializeField, Range(0.5f, 5f)] private float holdToCloseDuration = 2f;
+    private float holdTimer = 0f;
+
+    // new: hold indicator
+    [Header("Hold Indicator")]
+    [SerializeField] private bool showHoldIndicator = true;
+    [SerializeField] private string holdIndicatorTemplate = "Hold {0} to close";
+    [SerializeField, Range(10, 400)] private int holdIndicatorFontSize = 140; // increased size
+    [SerializeField, Range(0.001f, 0.05f)] private float holdIndicatorCharacterSize = 0.06f; // increased scale
+    [SerializeField] private float holdIndicatorOffsetY = 1.1f; // moved higher above dialogue
+    [SerializeField] private Color holdIndicatorColor = new Color(1f, 0.9f, 0.6f, 1f);
+    private GameObject holdIndicator;
+
     private GameObject activeBubble;
     private GameObject promptBubble;
     private bool playerInRange;
@@ -77,6 +91,25 @@ public class TextScript : MonoBehaviour
             {
                 autoAdvanceTimer = 0f;
                 AdvanceDialogue();
+            }
+        }
+
+        // Hold key to close dialogue (while in range)
+        if (triggerOnKeyPress && playerInRange && activeBubble != null)
+        {
+            if (Input.GetKey(interactKey))
+            {
+                holdTimer += Time.deltaTime;
+                if (holdTimer >= holdToCloseDuration)
+                {
+                    DespawnBubble();
+                    holdTimer = 0f;
+                    SpawnPrompt();
+                }
+            }
+            else
+            {
+                holdTimer = 0f;
             }
         }
 
@@ -148,6 +181,27 @@ public class TextScript : MonoBehaviour
 
         var meshRenderer = textObject.GetComponent<MeshRenderer>();
         meshRenderer.sortingOrder = 21;
+
+        // create hold indicator (above dialogue) when using key interaction
+        if (showHoldIndicator && triggerOnKeyPress)
+        {
+            holdIndicator = new GameObject("HoldIndicator");
+            holdIndicator.transform.SetParent(activeBubble.transform);
+            // position in local space; scaled by root so this offset works with your scaling
+            holdIndicator.transform.localPosition = new Vector3(0f, holdIndicatorOffsetY, 0f);
+            holdIndicator.transform.localScale = Vector3.one; // use 1:1 so characterSize controls visual size
+
+            var hiMesh = holdIndicator.AddComponent<TextMesh>();
+            hiMesh.text = string.Format(holdIndicatorTemplate, interactKey.ToString());
+            hiMesh.fontSize = holdIndicatorFontSize;
+            hiMesh.characterSize = holdIndicatorCharacterSize;
+            hiMesh.anchor = TextAnchor.LowerCenter;
+            hiMesh.alignment = TextAlignment.Center;
+            hiMesh.color = holdIndicatorColor;
+
+            var hiRenderer = holdIndicator.GetComponent<MeshRenderer>();
+            hiRenderer.sortingOrder = 22;
+        }
     }
 
     private void UpdateBubbleText(string newText)
@@ -213,6 +267,14 @@ public class TextScript : MonoBehaviour
             activeBubble = null;
             activeTextMesh = null;
         }
+
+        if (holdIndicator != null)
+        {
+            Destroy(holdIndicator);
+            holdIndicator = null;
+        }
+
+        holdTimer = 0f; // reset hold timer
     }
 
     private string WrapText(string text)
@@ -281,6 +343,7 @@ public class TextScript : MonoBehaviour
             DespawnPrompt();
             DespawnBubble();
             currentLineIndex = 0; // Reset dialogue progress when player leaves
+            holdTimer = 0f; // reset hold timer
         }
     }
 
@@ -288,5 +351,6 @@ public class TextScript : MonoBehaviour
     {
         DespawnBubble();
         DespawnPrompt();
+        holdTimer = 0f; // reset hold timer
     }
 }
