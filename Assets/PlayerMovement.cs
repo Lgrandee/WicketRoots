@@ -37,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Only horizontal movement
+        // Arcade box joystick input (assumes mapped to "Horizontal" axis)
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = 0;
 
@@ -51,6 +51,28 @@ public class PlayerMovement : MonoBehaviour
         if (movement.x != 0 && spriteRenderer != null)
         {
             spriteRenderer.flipX = movement.x < 0;
+        }
+
+        // Arcade box button input (ensure these are mapped in Input Manager)
+        if (Input.GetButtonDown("Jump"))
+        {
+            // TODO: Implement jump logic
+            Debug.Log("Jump button pressed");
+        }
+        if (Input.GetButtonDown("Attack"))
+        {
+            // TODO: Implement attack logic
+            Debug.Log("Attack button pressed");
+        }
+        if (Input.GetButtonDown("Special"))
+        {
+            // TODO: Implement special action logic
+            Debug.Log("Special button pressed");
+        }
+        if (Input.GetButtonDown("Interact"))
+        {
+            // TODO: Implement interact logic
+            Debug.Log("Interact button pressed");
         }
     }
 
