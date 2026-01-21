@@ -117,17 +117,13 @@ public class TextScript : MonoBehaviour
 
         autoAdvanceTimer = 0f; // Reset timer when starting dialogue
 
-        // Create bubble root
+        // Create bubble root (no background sprite)
         activeBubble = new GameObject("TextBubble");
         var root = activeBubble.transform;
         root.SetParent(transform);
-        root.SetPositionAndRotation(transform.position + bubbleOffset, Quaternion.identity);
+        root.SetPositionAndRotation(GetScreenPosition(), Quaternion.identity);
 
-        // Background via SpriteRenderer (solid color)
-        var renderer = activeBubble.AddComponent<SpriteRenderer>();
-        renderer.sprite = CreateSolidSprite(backgroundColor);
-        renderer.sortingOrder = 20;
-        // scale 1x1 sprite to desired size
+        // Keep scale for text sizing but don't create a background sprite
         root.localScale = new Vector3(backgroundSize.x, backgroundSize.y, 1f);
 
         // Text using legacy TextMesh (keeps dependencies minimal)
@@ -139,7 +135,7 @@ public class TextScript : MonoBehaviour
         activeTextMesh = textObject.AddComponent<TextMesh>();
         activeTextMesh.text = WrapText(dialogueLines[currentLineIndex]);
         activeTextMesh.fontSize = textSize;
-        activeTextMesh.characterSize = 0.01f; // fixed small value
+        activeTextMesh.characterSize = 0.01f;
         activeTextMesh.anchor = TextAnchor.MiddleCenter;
         activeTextMesh.alignment = TextAlignment.Center;
         activeTextMesh.color = textColor;
