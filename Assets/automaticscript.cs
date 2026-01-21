@@ -7,16 +7,13 @@ using UnityEngine;
 /// </summary>
 public class AutomaticScript : MonoBehaviour
 {
-    // ===== DIALOGUE CONTENT =====
     [Header("Dialogue Content")]
     [SerializeField] private TextAsset scriptFile;
 
-    // ===== INTERACTION SETTINGS =====
     [Header("Interaction")]
     [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private bool autoPlayOnEnter = true;
 
-    // ===== SCREEN POSITIONING =====
     [Header("Dialogue Screen Position")]
     [SerializeField] private Camera mainCamera;
     [SerializeField, Range(0f, 1f)] private float screenX = 0.5f;
@@ -34,32 +31,23 @@ public class AutomaticScript : MonoBehaviour
     [Header("Prompt")]
     [SerializeField] private string promptText = "Press E to talk";
     [SerializeField] private Vector3 promptOffset = new Vector3(0f, 2.5f, 0f);
-    [SerializeField] private Color promptColor = new Color(1f, 1f, 0.5f, 1f);
+    [SerializeField] private Color promptColor = Color.yellow;
 
-    // ===== TEXT FORMATTING =====
     [Header("Text Wrapping")]
-    [SerializeField, Range(10, 100)] private int maxCharactersPerLine = 40;
+    [SerializeField] private int maxCharactersPerLine = 40;
 
-    // ===== AUTO ADVANCE =====
     [Header("Auto Advance")]
     [SerializeField] private bool autoAdvance = true;
-    [SerializeField, Range(1f, 10f)] private float secondsPerLine = 3f;
+    [SerializeField] private float secondsPerLine = 2f;  // <-- fixed to 2 seconds
 
-    // ===== AUDIO =====
-    [Header("Sound Settings")]
-    [SerializeField] private AudioClip dialogueSound;
-    [SerializeField, Range(0.1f, 10f)] private float soundDuration = 2f;
-    [SerializeField, Range(0f, 1f)] private float soundVolume = 1f;
+    private GameObject overlay;
+    private GameObject bubble;
+    private TextMesh textMesh;
+    private GameObject prompt;
 
-    // ===== INTERNAL STATE =====
-    private GameObject activeBubble;
-    private TextMesh activeTextMesh;
-    private GameObject promptBubble;
-    private AudioSource audioSource;
-
-    private string[] dialogueLines;
-    private int currentLineIndex;
-    private float autoAdvanceTimer;
+    private string[] lines;
+    private int index;
+    private float timer;
     private bool playerInRange;
 
     private void Awake()
@@ -72,35 +60,29 @@ public class AutomaticScript : MonoBehaviour
     {
         if (!autoPlayOnEnter && playerInRange && Input.GetKeyDown(interactKey))
         {
-            if (activeBubble == null)
+            if (bubble == null)
             {
-                SpawnBubble();
+                SpawnDialogue();
                 DespawnPrompt();
             }
             else
             {
-                AdvanceDialogue();
+                NextLine();
             }
         }
 
-        if (autoAdvance && activeBubble != null && dialogueLines != null)
+        if (autoAdvance && bubble != null)
         {
-            autoAdvanceTimer += Time.deltaTime;
-            if (autoAdvanceTimer >= secondsPerLine)
+            timer += Time.deltaTime;
+            if (timer >= secondsPerLine)
             {
-                autoAdvanceTimer = 0f;
-                AdvanceDialogue();
+                timer = 0f;
+                NextLine();
             }
         }
 
-        if (activeBubble != null)
-            UpdateBubblePosition();
-
-        if (promptBubble != null)
-            UpdatePromptPosition();
-    }
-
-    // ===== DIALOGUE =====
+        if (bubble != null)
+            bubble.transform.position = GetScreenPosition();
 
         if (overlay != null)
             overlay.transform.position = GetScreenPosition();
