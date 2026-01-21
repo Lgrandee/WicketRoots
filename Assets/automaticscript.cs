@@ -28,7 +28,7 @@ public class AutomaticScript : MonoBehaviour
     [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f);
     [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.16f, 0.9f);
     [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
-    [SerializeField, Range(10, 200)] private int textSize = 60;
+    [SerializeField, Range(10, 200)] private int textSize = 120;
 
     // ===== INTERACTION PROMPT =====
     [Header("Prompt Settings")]
@@ -141,7 +141,7 @@ public class AutomaticScript : MonoBehaviour
         activeTextMesh = textObj.AddComponent<TextMesh>();
         activeTextMesh.text = WrapText(dialogueLines[currentLineIndex]);
         activeTextMesh.fontSize = textSize;
-        activeTextMesh.characterSize = 0.01f;
+        activeTextMesh.characterSize = 0.02f;
         activeTextMesh.anchor = TextAnchor.MiddleCenter;
         activeTextMesh.alignment = TextAlignment.Center;
         activeTextMesh.color = textColor;
@@ -198,8 +198,8 @@ public class AutomaticScript : MonoBehaviour
 
         var tm = promptBubble.AddComponent<TextMesh>();
         tm.text = promptText;
-        tm.fontSize = 80;
-        tm.characterSize = 0.05f;
+        tm.fontSize = 120;
+        tm.characterSize = 0.06f;
         tm.anchor = TextAnchor.MiddleCenter;
         tm.color = promptColor;
 
