@@ -1,9 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// AutomaticScript handles dialogue display and management in a 2D point-and-click game.
-/// Dialogue bubbles are screen-anchored (bottom/middle of screen),
-/// while interaction prompts remain above the character.
+    /// AutomaticScript handles dialogue display and management in a 2D point-and-click game.
+    /// It displays text bubbles with dialogue content, optionally plays audio, and can auto-advance through dialogue lines.
+    /// Players can interact with dialogue via a key press or it can auto-play when they enter a trigger zone.
 /// </summary>
 public class AutomaticScript : MonoBehaviour
 {
