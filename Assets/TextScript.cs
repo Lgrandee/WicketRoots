@@ -32,7 +32,7 @@ public class TextScript : MonoBehaviour
 
     [Header("Auto Advance")]
     [SerializeField] private bool autoAdvance = true;
-    [SerializeField, Range(1f, 10f)] private float secondsPerLine = 3f;
+    [SerializeField, Range(1f, 10f)] private float secondsPerLine = 2f; // was 3f
 
     private GameObject activeBubble;
     private GameObject promptBubble;
