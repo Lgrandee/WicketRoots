@@ -16,6 +16,12 @@ public class TextScript : MonoBehaviour
     [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
     [SerializeField, Range(10, 500)] private int textSize = 500; // font size
 
+    [Header("Screen Position")]
+    [SerializeField] private Camera mainCamera;
+    [SerializeField, Range(0f, 1f)] private float screenX = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float screenY = 0.1f; // bottom of screen
+    [SerializeField] private float screenDepth = 10f;
+
     [Header("Prompt Settings")]
     [SerializeField] private string promptText = "Press E to talk";
     [SerializeField] private Vector3 promptOffset = new Vector3(0f, 2.5f, 0f);
@@ -155,7 +161,13 @@ public class TextScript : MonoBehaviour
     private void UpdateBubblePosition()
     {
         if (activeBubble != null)
-            activeBubble.transform.position = transform.position + bubbleOffset;
+            activeBubble.transform.position = GetScreenPosition();
+    }
+
+    private Vector3 GetScreenPosition()
+    {
+        if (mainCamera == null) mainCamera = Camera.main;
+        return mainCamera.ViewportToWorldPoint(new Vector3(screenX, screenY, screenDepth));
     }
 
     private void SpawnPrompt()
