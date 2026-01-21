@@ -7,13 +7,16 @@ using UnityEngine;
 /// </summary>
 public class AutomaticScript : MonoBehaviour
 {
+    // ===== DIALOGUE CONTENT =====
     [Header("Dialogue Content")]
     [SerializeField] private TextAsset scriptFile;
 
+    // ===== INTERACTION SETTINGS =====
     [Header("Interaction")]
     [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private bool autoPlayOnEnter = true;
 
+    // ===== SCREEN POSITIONING =====
     [Header("Dialogue Screen Position")]
     [SerializeField] private Camera mainCamera;
     [SerializeField, Range(0f, 1f)] private float screenX = 0.5f; // center
