@@ -19,19 +19,19 @@ public class AutomaticScript : MonoBehaviour
     // ===== SCREEN POSITIONING =====
     [Header("Dialogue Screen Position")]
     [SerializeField] private Camera mainCamera;
-    [SerializeField, Range(0f, 1f)] private float screenX = 0.5f; // center
-    [SerializeField, Range(0f, 1f)] private float screenY = 0.2f; // lower-middle
-    [SerializeField] private float screenDepth = 10f;
+    [SerializeField, Range(0f, 1f)] private float screenX = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float screenY = 0.2f;
 
-    // ===== DIALOGUE BUBBLE APPEARANCE =====
-    [Header("Dialogue Bubble Appearance")]
-    [SerializeField] private Vector2 backgroundSize = new Vector2(4.2f, 2.2f);
-    [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.16f, 0.9f);
-    [SerializeField] private Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
-    [SerializeField, Range(10, 200)] private int textSize = 60;
+    [Header("Dialogue Bubble")]
+    [SerializeField] private Vector2 backgroundSize = new Vector2(10f, 2.5f);
+    [SerializeField] private Color backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+    [SerializeField] private Color textColor = Color.white;
+    [SerializeField] private int textSize = 60;
 
-    // ===== INTERACTION PROMPT =====
-    [Header("Prompt Settings")]
+    [Header("Screen Overlay")]
+    [SerializeField] private Color overlayColor = new Color(0f, 0f, 0f, 0.65f);
+
+    [Header("Prompt")]
     [SerializeField] private string promptText = "Press E to talk";
     [SerializeField] private Vector3 promptOffset = new Vector3(0f, 2.5f, 0f);
     [SerializeField] private Color promptColor = new Color(1f, 1f, 0.5f, 1f);
@@ -102,146 +102,122 @@ public class AutomaticScript : MonoBehaviour
 
     // ===== DIALOGUE =====
 
-    private void LoadDialogueLines()
-    {
-        dialogueLines = scriptFile != null
-            ? scriptFile.text.Split(new[] { '\n' }, System.StringSplitOptions.RemoveEmptyEntries)
-            : new string[0];
+        if (overlay != null)
+            overlay.transform.position = GetScreenPosition();
     }
 
-    private void SpawnBubble()
+    private void SpawnDialogue()
     {
-        if (activeBubble != null) return;
+        LoadLines();
+        if (lines.Length == 0) return;
 
-        LoadDialogueLines();
-        if (dialogueLines.Length == 0) return;
+        index = 0;
+        timer = 0f;
 
-        currentLineIndex = 0;
-        autoAdvanceTimer = 0f;
+        SpawnOverlay();
 
-        PlayDialogueSound();
+        bubble = new GameObject("DialogueBubble");
+        bubble.transform.position = GetScreenPosition();
 
-        activeBubble = new GameObject("DialogueBubble");
-        activeBubble.transform.position = GetScreenPosition();
+        SpriteRenderer bg = bubble.AddComponent<SpriteRenderer>();
+        bg.sprite = CreateSprite(backgroundColor);
+        bg.sortingOrder = 10;
+        bubble.transform.localScale = new Vector3(backgroundSize.x, backgroundSize.y, 1f);
 
-        var bg = activeBubble.AddComponent<SpriteRenderer>();
-        bg.sprite = CreateSolidSprite(backgroundColor);
-        bg.sortingOrder = 20;
-        activeBubble.transform.localScale = new Vector3(backgroundSize.x, backgroundSize.y, 1f);
-
-        var textObj = new GameObject("DialogueText");
-        textObj.transform.SetParent(activeBubble.transform);
+        GameObject textObj = new GameObject("DialogueText");
+        textObj.transform.SetParent(bubble.transform);
         textObj.transform.localPosition = Vector3.zero;
-        textObj.transform.localScale = new Vector3(
-            1f / backgroundSize.x,
-            1f / backgroundSize.y,
-            1f
-        );
 
-        activeTextMesh = textObj.AddComponent<TextMesh>();
-        activeTextMesh.text = WrapText(dialogueLines[currentLineIndex]);
-        activeTextMesh.fontSize = textSize;
-        activeTextMesh.characterSize = 0.01f;
-        activeTextMesh.anchor = TextAnchor.MiddleCenter;
-        activeTextMesh.alignment = TextAlignment.Center;
-        activeTextMesh.color = textColor;
+        textMesh = textObj.AddComponent<TextMesh>();
+        textMesh.text = WrapText(lines[index]);
+        textMesh.fontSize = textSize;
+        textMesh.characterSize = 0.03f; // <-- smaller text
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.color = textColor;
 
-        textObj.GetComponent<MeshRenderer>().sortingOrder = 21;
+        textObj.GetComponent<MeshRenderer>().sortingOrder = 15;
     }
 
-    private void AdvanceDialogue()
+    private void NextLine()
     {
-        autoAdvanceTimer = 0f;
-        currentLineIndex++;
+        index++;
 
-        if (currentLineIndex < dialogueLines.Length)
+        if (index < lines.Length)
         {
-            activeTextMesh.text = WrapText(dialogueLines[currentLineIndex]);
+            textMesh.text = WrapText(lines[index]);
         }
         else
         {
-            DespawnBubble();
+            DespawnDialogue();
             SpawnPrompt();
         }
     }
 
-    private void UpdateBubblePosition()
+    private void DespawnDialogue()
     {
-        activeBubble.transform.position = GetScreenPosition();
+        if (bubble != null) Destroy(bubble);
+        if (overlay != null) Destroy(overlay);
+
+        bubble = null;
+        overlay = null;
+        textMesh = null;
     }
 
-    private Vector3 GetScreenPosition()
+    private void SpawnOverlay()
     {
-        return mainCamera.ViewportToWorldPoint(
-            new Vector3(screenX, screenY, screenDepth)
-        );
+        overlay = new GameObject("DialogueOverlay");
+        overlay.transform.position = GetScreenPosition();
+
+        SpriteRenderer sr = overlay.AddComponent<SpriteRenderer>();
+        sr.sprite = CreateSprite(overlayColor);
+        sr.sortingOrder = 0;
+
+        // Use camera size to fill screen (works for most resolutions)
+        float height = mainCamera.orthographicSize * 2f;
+        float width = height * mainCamera.aspect;
+
+        overlay.transform.localScale = new Vector3(width, height, 1f);
     }
-
-    private void DespawnBubble()
-    {
-        if (activeBubble != null)
-            Destroy(activeBubble);
-
-        activeBubble = null;
-        activeTextMesh = null;
-    }
-
-    // ===== PROMPT =====
 
     private void SpawnPrompt()
     {
-        if (promptBubble != null) return;
+        if (prompt != null) return;
 
-        promptBubble = new GameObject("PromptText");
-        promptBubble.transform.SetParent(transform);
-        promptBubble.transform.position = transform.position + promptOffset;
+        prompt = new GameObject("Prompt");
+        prompt.transform.position = transform.position + promptOffset;
 
-        var tm = promptBubble.AddComponent<TextMesh>();
+        TextMesh tm = prompt.AddComponent<TextMesh>();
         tm.text = promptText;
         tm.fontSize = 80;
         tm.characterSize = 0.05f;
         tm.anchor = TextAnchor.MiddleCenter;
         tm.color = promptColor;
 
-        promptBubble.GetComponent<MeshRenderer>().sortingOrder = 25;
-    }
-
-    private void UpdatePromptPosition()
-    {
-        promptBubble.transform.position = transform.position + promptOffset;
+        prompt.GetComponent<MeshRenderer>().sortingOrder = 20;
     }
 
     private void DespawnPrompt()
     {
-        if (promptBubble != null)
-            Destroy(promptBubble);
-
-        promptBubble = null;
+        if (prompt != null) Destroy(prompt);
+        prompt = null;
     }
 
-    // ===== AUDIO =====
-
-    private void PlayDialogueSound()
+    private Vector3 GetScreenPosition()
     {
-        if (dialogueSound == null) return;
-
-        if (audioSource == null)
-            audioSource = gameObject.AddComponent<AudioSource>();
-
-        audioSource.clip = dialogueSound;
-        audioSource.volume = soundVolume;
-        audioSource.Play();
-        StartCoroutine(StopSoundAfterDuration());
+        Vector3 pos = mainCamera.ViewportToWorldPoint(
+            new Vector3(screenX, screenY, 0f)
+        );
+        pos.z = 0f;
+        return pos;
     }
 
-    private System.Collections.IEnumerator StopSoundAfterDuration()
+    private void LoadLines()
     {
-        yield return new WaitForSeconds(soundDuration);
-        if (audioSource != null)
-            audioSource.Stop();
+        lines = scriptFile != null
+            ? scriptFile.text.Split('\n')
+            : new string[0];
     }
-
-    // ===== HELPERS =====
 
     private string WrapText(string text)
     {
@@ -266,15 +242,13 @@ public class AutomaticScript : MonoBehaviour
         return result + line;
     }
 
-    private Sprite CreateSolidSprite(Color color)
+    private Sprite CreateSprite(Color color)
     {
-        var tex = new Texture2D(1, 1);
+        Texture2D tex = new Texture2D(1, 1);
         tex.SetPixel(0, 0, color);
         tex.Apply();
         return Sprite.Create(tex, new Rect(0, 0, 1, 1), Vector2.one * 0.5f);
     }
-
-    // ===== TRIGGERS =====
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -283,7 +257,7 @@ public class AutomaticScript : MonoBehaviour
         playerInRange = true;
 
         if (autoPlayOnEnter)
-            SpawnBubble();
+            SpawnDialogue();
         else
             SpawnPrompt();
     }
@@ -293,8 +267,7 @@ public class AutomaticScript : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         playerInRange = false;
-        DespawnBubble();
+        DespawnDialogue();
         DespawnPrompt();
-        currentLineIndex = 0;
     }
 }
