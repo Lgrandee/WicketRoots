@@ -579,7 +579,7 @@ MonoBehaviour:
   sceneToLoad: parentsbedroom
   fadeDuration: 1
   spawnPointName: DoorSpawn
-  promptMessage: Press E to enter  parentsbedroom
+  promptMessage: Press E to enter parents bedroom
 --- !u!61 &1061320158
 BoxCollider2D:
   m_ObjectHideFlags: 0
