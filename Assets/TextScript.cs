@@ -42,10 +42,10 @@ public class TextScript : MonoBehaviour
     [Header("Hold Indicator")]
     [SerializeField] private bool showHoldIndicator = true;
     [SerializeField] private string holdIndicatorTemplate = "Hold {0} to close";
-    [SerializeField, Range(10, 400)] private int holdIndicatorFontSize = 140; // increased size
-    [SerializeField, Range(0.001f, 0.05f)] private float holdIndicatorCharacterSize = 0.06f; // increased scale
-    [SerializeField] private float holdIndicatorOffsetY = 1.1f; // moved higher above dialogue
-    [SerializeField] private Color holdIndicatorColor = new Color(1f, 0.9f, 0.6f, 1f);
+    [SerializeField, Range(10, 400)] private int holdIndicatorFontSize = 80; // smaller
+    [SerializeField, Range(0.001f, 0.05f)] private float holdIndicatorCharacterSize = 0.03f; // smaller
+    [SerializeField] private float holdIndicatorOffsetY = 1.1f;
+    [SerializeField] private Color holdIndicatorColor = new Color(0.8f, 0.7f, 0.4f, 1f); // darker/muted
     private GameObject holdIndicator;
 
     private GameObject activeBubble;
@@ -190,7 +190,8 @@ public class TextScript : MonoBehaviour
             // parent to the dialogue text object so it uses the same local scale and coordinates
             holdIndicator.transform.SetParent(textObject.transform);
             holdIndicator.transform.localPosition = new Vector3(0f, holdIndicatorOffsetY, 0f);
-            holdIndicator.transform.localScale = Vector3.one;
+            // match the dialogue text object's localScale so sizing is consistent (prevents stretching)
+            holdIndicator.transform.localScale = textObject.transform.localScale;
 
             var hiMesh = holdIndicator.AddComponent<TextMesh>();
             hiMesh.text = string.Format(holdIndicatorTemplate, interactKey.ToString());
