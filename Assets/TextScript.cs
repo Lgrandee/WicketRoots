@@ -186,10 +186,11 @@ public class TextScript : MonoBehaviour
         if (showHoldIndicator && triggerOnKeyPress)
         {
             holdIndicator = new GameObject("HoldIndicator");
-            holdIndicator.transform.SetParent(activeBubble.transform);
-            // position in local space; scaled by root so this offset works with your scaling
+
+            // parent to the dialogue text object so it uses the same local scale and coordinates
+            holdIndicator.transform.SetParent(textObject.transform);
             holdIndicator.transform.localPosition = new Vector3(0f, holdIndicatorOffsetY, 0f);
-            holdIndicator.transform.localScale = Vector3.one; // use 1:1 so characterSize controls visual size
+            holdIndicator.transform.localScale = Vector3.one;
 
             var hiMesh = holdIndicator.AddComponent<TextMesh>();
             hiMesh.text = string.Format(holdIndicatorTemplate, interactKey.ToString());
