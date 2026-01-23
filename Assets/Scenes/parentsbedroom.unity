@@ -1089,7 +1089,7 @@ MonoBehaviour:
   sceneToLoad: matildasroom
   fadeDuration: 1
   spawnPointName: DoorSpawn
-  promptMessage: Press E to enter Matilda`s room
+  promptMessage: Press E to enter Matilda's room
 --- !u!61 &1066872566
 BoxCollider2D:
   m_ObjectHideFlags: 0
